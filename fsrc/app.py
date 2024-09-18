@@ -9,7 +9,11 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 @app.route('/')
 def home():
-    return render_template('audio_recorder.html')
+    return render_template('index.html')
+
+@app.route('/audio')
+def audio():
+    return render_template('audio.html')
 
 @app.route('/save_audio', methods=['POST'])
 def save_audio():
