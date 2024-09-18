@@ -4,8 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio Recorder</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>Audio Recorder is Running...</h1>
+    <h1>Audio Recorder</h1>
+    <button id="startButton">Record</button>
+    <button id="stopButton" disabled>Stop</button>
+    <button id="saveButton" disabled>Save</button><br>
+    <audio id="audioPlayback" controls></audio>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
