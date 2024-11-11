@@ -32,13 +32,11 @@ def download_videos(keyword, required_duration):
         data = response.json()
         total_duration = 0
         checks_remaining = 50
-        
         while checks_remaining > 0:
             random_video = random.choice(data.get('videos', []))
             video_file = random_video['video_files'][0]
             width = video_file['width']
             height = video_file['height']
-
             if width == (height / 9) * 16:
                 video_url = video_file['link']
                 r = requests.get(video_url, stream=True)
@@ -47,10 +45,8 @@ def download_videos(keyword, required_duration):
                     with open(video_path, 'wb') as f:
                         for chunk in r.iter_content(chunk_size=1024):
                             f.write(chunk)
-
                     video_path = adjust_framerate(video_path)
                     video_duration = get_video_duration(video_path)
-
                     if total_duration + video_duration >= required_duration:
                         if total_duration < required_duration:
                             remaining_duration = required_duration - total_duration
@@ -66,7 +62,6 @@ def download_videos(keyword, required_duration):
                     print(f"Failed to download video for '{keyword}'")
             else:
                 print(f"Randomly selected video for '{keyword}' does not have a 16:9 aspect ratio.")
-            
             checks_remaining -= 1
     else:
         print(f"Error fetching videos for '{keyword}': {response.status_code} - {response.text}")
@@ -133,18 +128,13 @@ def add_audio_to_video(video_file, audio_file, output_file):
     ]
     subprocess.run(cmd_overlay, check=True)
 
-# Example usage
+# Working Usage
 json_file = "highlighted_words.json"
 captions = read_json(json_file)
-
-# Get total duration of Test.mp4
 video_file = "Test.mp4"
 total_duration = get_video_duration(video_file)
-
-# Get start and end time of the video
 video_start_time = datetime.strptime("00:00:00", "%H:%M:%S")
 video_end_time = video_start_time + timedelta(seconds=total_duration)
-
 all_video_paths = []
 last_end_time = video_start_time
 
@@ -164,20 +154,15 @@ for segment in captions:
 
     last_end_time = end_time
 
-# Add black segment if the last segment ends before the end of the video
 if last_end_time < video_end_time:
     black_segment_path = "black_end.mp4"
     create_black_segment(last_end_time, video_end_time, black_segment_path)
     all_video_paths.append(black_segment_path)
 
 concatenate_videos(all_video_paths, "output.mp4")
-
-# Extract audio from Test.mp4
 extract_audio('Test.mp4', 'test_audio.aac')
-
-# Add extracted audio to the final concatenated video
 add_audio_to_video('output.mp4', 'test_audio.aac', 'final_output.mp4')
 
-# Clean up
+# done running
 os.remove('test_audio.aac')
 os.remove('output.mp4')

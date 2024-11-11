@@ -2,10 +2,9 @@ from flask import Flask, render_template_string, request, jsonify
 import os
 import re
 import json
-import random
 
 app = Flask(__name__)
-highlighted_sets = []  # To store sets of highlighted words
+highlighted_sets = []
 
 # Word class to store each word, its position, and timestamp
 class Word:
@@ -18,47 +17,35 @@ class Word:
 def extract_words(file_path):
     with open(file_path, 'r') as file:
         content = file.read()
-
-    # Template: skip_header_lines defines how many lines to skip before relevant text
     skip_header_lines = 6  
     lines = content.split('\n')
     relevant_text = '\n'.join(lines[skip_header_lines:])
-
-    # Extract the first word that appears before any <, if it exists
     first_word_match = re.match(r'^\s*([^<\s]+)', relevant_text)
-    first_word_timestamp = "00:00:00.000"  # First word timestamp, can be adjusted
+    first_word_timestamp = "00:00:00.000"
     if first_word_match:
-        first_word = first_word_match.group(1).strip().replace(' ', '')  # Template for first word processing
+        first_word = first_word_match.group(1).strip().replace(' ', '')
     else:
         first_word = ''
-    
-    # Extract timestamp and words between <c> tags, pattern can be customized
     matches = re.findall(r'<(\d{2}:\d{2}:\d{2}\.\d{3})><c>(.*?)</c>', relevant_text)
     
     word_objects = []
     if first_word:
         word_objects.append(Word(text=first_word, index=0, timestamp=first_word_timestamp))
-    
     for i, (timestamp, word) in enumerate(matches):
-        word = word.replace(' ', '')  # Remove spaces from the word, can modify as needed
+        word = word.replace(' ', '')
         word_objects.append(Word(text=word, index=i + 1, timestamp=timestamp))
-    
     return word_objects
 
 @app.route('/')
 def display_text():
-    # Template: Define file path for captions file
     file_path = os.path.join(os.path.dirname(__file__), 'captions.txt')
     word_objects = extract_words(file_path)
-
-    # Template: Define settings for timeline visualization
-    total_seconds = 15  # Adjust the total length of the timeline
-    window_seconds = 8  # Define the number of seconds visible in the window
-    screen_width = 2560  # Adjust the screen width (in pixels)
+    total_seconds = 15
+    window_seconds = 8
+    screen_width = 2560 # screen pixels
     pixels_per_second = screen_width / window_seconds
     timeline_width = total_seconds * pixels_per_second
-    
-    # Convert timestamps to seconds
+
     def timestamp_to_seconds(timestamp):
         try:
             match = re.match(r'^(\d{2}):(\d{2}):(\d{2})\.(\d{3})$', timestamp)
@@ -76,7 +63,6 @@ def display_text():
             print(f'Error processing timestamp: {e}')
             return 0
 
-    # Create word positions for display
     words_with_positions = [
         {
             'text': word.text,
